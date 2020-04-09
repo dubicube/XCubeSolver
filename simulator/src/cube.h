@@ -5,25 +5,30 @@
 class Block {
 private:
     int id;
-    int ori;
+    int orientation;
 public:
     Block();
-    Block(int new_id, int new_or);
+    Block(int new_id, int new_orientation);
     int getID();
-    int getORI();
+    int getOrientation();
 };
 
 class Cube {
 private:
-    int dim;
+    int dimension;
     Block* corners;
     Block* edges;
     Block* centers;
+    int baseIDCorner, baseIDEdge, baseIDCenter;
+    int nbrCorner, nbrEdge, nbrCenter;
 public:
     Cube();
-    Cube(int new_dim);
+    Cube(int new_dimension);
     ~Cube();
-    int getDim();
+    int getDimension();
+    void init();
+    void move(Cube c, int axe, int side, int layer, int direction);
+private:
 };
 
 #endif

@@ -9,5 +9,5 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
     Cube c = Cube(3);
-    cout << "Cube created with dim = " << c.getDim() << endl;
+    cout << "Cube created with dim = " << c.getDimension() << endl;
 }
