@@ -31,7 +31,8 @@ $(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
 
 all2:
 	@$(CC) $(CFLAGS) -c src/main.cpp -o obj/main.o
-	@$(LINKER) bin/main obj/main.o $(LFLAGS)
+	@$(CC) $(CFLAGS) -c src/cube.cpp -o obj/cube.o
+	@$(LINKER) bin/main obj/main.o obj/cube.o $(LFLAGS)
 
 .PHONY: clean
 clean:

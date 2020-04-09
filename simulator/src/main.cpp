@@ -5,8 +5,9 @@ using namespace std;
 #include <unistd.h>
 #include <string.h>
 
-
+#include "cube.h"
 
 int main(int argc, char* argv[]) {
-    cout << "Coucou" << endl;
+    Cube c = Cube(3);
+    cout << "Cube created with dim = " << c.getDim() << endl;
 }
