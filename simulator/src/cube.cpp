@@ -1,6 +1,8 @@
 #include <iostream>
 #include "cube.h"
 
+using namespace std;
+
 Block::Block() {
     id = -1;
     orientation = -1;
@@ -18,42 +20,23 @@ int Block::getOrientation() {
 
 Cube::Cube() {
     dimension = 0;
-    corners = NULL;
-    edges = NULL;
-    centers = NULL;
+    //blocks = NULL;
 }
 Cube::Cube(int new_dimension) {
     dimension = new_dimension;
 
-    nbrCorner = 4;
-    nbrEdge = 12*(dimension-2);
-    nbrCenter = (dimension-2)*(dimension-2);
-
-    corners = new Block[nbrCorner*sizeof(Block)];
-    edges = new Block[nbrEdge*sizeof(Block)];
-    centers = new Block[nbrCenter*sizeof(Block)];
-
-    baseIDCorner = 0;
-    baseIDEdge = 8;
-    baseIDCenter = 12*(dimension-2);
+    nbrBlock = dimension*dimension*dimension;
+    blocks = new Block[nbrBlock];
 }
 Cube::~Cube() {
     if (dimension > 0) {
-        delete[] corners;
-        delete[] edges;
-        delete[] centers;
+        delete[] blocks;
     }
 }
 
 void Cube::init() {
-    for (int i = 0; i < nbrCorner; i++) {
-        corners[i] = Block(i+baseIDCorner, 0);
-    }
-    for (int i = 0; i < nbrEdge; i++) {
-        corners[i] = Block(i+baseIDEdge, 0);
-    }
-    for (int i = 0; i < nbrCenter; i++) {
-        corners[i] = Block(i+baseIDCenter, 0);
+    for (int i = 0; i < nbrBlock; i++) {
+        blocks[i] = Block(i, 0);
     }
 }
 
@@ -61,12 +44,83 @@ int Cube::getDimension() {
     return dimension;
 }
 
-//0 UP
-//1 DWON
-//2 RIGHT
-//3 LEFT
-//4 FRONT
-//5 BACK
 
-void Cube::move(Cube c, int axe, int side, int layer, int direction) {
+void Block::rotate(int type, int axe, int angle) {
+    // Rotate only if angle is odd
+    if (angle&1) {
+        if (type == 2) { // Edge
+            // Always invert between 0 and 1
+            orientation = 1-orientation;
+        } else if (type == 3) { // Corner
+            // This is magic
+            if (orientation != axe)
+                orientation = 3-axe-orientation;
+        }
+    }
+}
+
+void Cube::rotate(int xs, int ys, int angle, int* xe, int* ye) {
+    if (angle == 1) {
+        *xe = dimension-1-ys;
+        *ye = xs;
+    } else if (angle == 2) {
+        *xe = dimension-1-xs;
+        *ye = dimension-1-ys;
+    } else if (angle == 3) {
+        *xe = ys;
+        *ye = dimension-1-xs;
+    } else {
+        *xe = xs;
+        *ye = ys;
+    }
+}
+
+int Cube::getBlockType(int x, int y, int z) {
+    return (x==0||x==dimension-1)+(y==0||y==dimension-1)+(z==0||z==dimension-1);
+}
+
+void Cube::move(Cube* c, int axe, int layer, int angle) {
+    int xe, ye;
+    for(int xs = 0; xs < dimension; xs++) {
+        for(int ys = 0; ys < dimension; ys+=((layer==0||layer==dimension-1||xs==0||xs==dimension-1)?1:dimension-1)) {
+            rotate(xs, ys, angle, &xe, &ye);
+
+            int btype = getBlockType(xe, ye, layer); // Independent of axe
+            int ptrs, ptre;
+            if (axe == 0) {
+                ptrs = xs+ys*dimension+layer*dimension*dimension;
+                ptre = xe+ye*dimension+layer*dimension*dimension;
+            } else if(axe == 1) {
+                ptrs = layer+xs*dimension+ys*dimension*dimension;
+                ptre = layer+xe*dimension+ye*dimension*dimension;
+            } else if (axe == 2) {
+                ptrs = ys+layer*dimension+xs*dimension*dimension;
+                ptre = ye+layer*dimension+xe*dimension*dimension;
+            }
+            c->blocks[ptre] = blocks[ptrs];
+            c->blocks[ptre].rotate(btype, axe, angle);
+        }
+    }
+}
+
+void Cube::aff() {
+    for(int z = 0; z < dimension; z++) {
+        for(int y = 0; y < dimension; y++) {
+            for(int x = 0; x < dimension; x++) {
+                cout << blocks[x+y*dimension+z*dimension*dimension].getID() << " ";
+            }
+            cout << endl;
+        }
+        cout << endl;
+    }
+    //*
+    for(int z = 0; z < dimension; z++) {
+        for(int y = 0; y < dimension; y++) {
+            for(int x = 0; x < dimension; x++) {
+                cout << blocks[x+y*dimension+z*dimension*dimension].getOrientation() << " ";
+            }
+            cout << endl;
+        }
+        cout << endl;
+    }//*/
 }
